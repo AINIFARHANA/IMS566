@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointments - Lunara Clinic</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #01357a; 
+            --primary-light: #2e5bb8;
+            --secondary: #EBF5FB; 
+            --text-dark: #2d3436;
+            --text-light: #636e72;
+            --white: #ffffff;
+            --sidebar-width: 260px;
+        }
+
+        body {
+            font-family: 'Times New Roman', sans-serif; 
+            background-color: #f0f2f5;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: linear-gradient(180deg, #01357a 0%, #002a63 100%);
+            color: white;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar-logo {
+            width: 70px;
+            height: 70px;
+            background: var(--secondary);
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border: 3px solid rgba(255,255,255,0.2);
+        }
+
+        .sidebar-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .clinic-name { font-weight: 800; font-size: 20px; letter-spacing: 0.5px; }
+        .clinic-tagline { font-size: 13px; opacity: 0.8; font-weight: 600; }
+
+        .nav-link {
+            color: rgba(255,255,255,0.7);
+            padding: 12px 15px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            transition: all 0.3s;
+            font-weight: 600;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: rgba(255,255,255,0.15);
+            color: #ffffff; 
+            transform: translateX(5px);
+        }
+
+        /* --- Main Content --- */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 20px 30px;
+            transition: all 0.3s;
+        }
+
+        /* --- Top Header --- */
+        .top-header {
+            background: var(--white);
+            padding: 15px 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        /* --- Cards & Tables --- */
+        .table-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.03);
+            padding: 25px;
+            height: auto;
+            margin-bottom: 30px;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .table-responsive { 
+            border-radius: 10px; 
+            overflow-x: auto; 
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .table-custom th { 
+            background-color: var(--primary);
+            color: white;
+            padding: 15px; 
+            font-weight: 600; 
+            border: none; 
+        }
+        .table-custom td { padding: 15px; vertical-align: middle; border-bottom: 1px solid #eee; color: var(--text-dark); }
+        .table-custom tbody tr:hover { background-color: #f8f9fa; }
+
+        /* Controls Bar Styling */
+        .controls-container {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .status-scheduled {
+            background-color: #5689d5; 
+            color: white;
+        }
+        .status-completed {
+            background-color: #198754; 
+            color: white;
+        }
+        .status-cancelled {
+            background-color: #dc3545; 
+            color: white;
+        }
+
+        /* --- Toast Notification --- */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 2000;
+        }
+        .custom-toast {
+            background: white;
+            border-left: 4px solid var(--primary);
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: toastIn 0.3s ease-out;
+            min-width: 250px;
+        }
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateX(50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* --- Responsive Queries --- */
+        .mobile-toggle {
+            display: none; 
+            background: var(--primary);
+            border: none;
+            color: white;
+            font-size: 18px;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            z-index: 1002;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        @media (max-width: 991px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.active { transform: translateX(0); }
+            .main-content { margin-left: 0; }
+            .mobile-toggle { display: flex; align-items: center; justify-content: center; }
+            
+            .controls-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .controls-container > * {
+                width: 100% !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Mobile Toggle -->
+    <div style="position: fixed; top: 15px; left: 15px; z-index: 1002;">
+        <button class="mobile-toggle" onclick="toggleSidebar()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <img src="image/logo.png" alt="Lunara Clinic Logo">
+            </div>
+            <div class="clinic-name">Lunara Clinic</div>
+            <div class="clinic-tagline">Healing with Care & Comfort</div>
+        </div>
+
+        <div class="nav flex-column">
+            <a href="index.html" class="nav-link">
+                <i class="fas fa-th-large"></i> Dashboard
+            </a>
+            <a href="patient.html" class="nav-link ">
+                <i class="fas fa-user-injured"></i> Patients
+            </a>
+            <a href="doctor.html" class="nav-link ">
+                <i class="fas fa-user-md"></i> Doctors
+            </a>
+            <a href="appointment.html" class="nav-link active">
+                <i class="fas fa-calendar-check"></i> Appointments
+            </a>
+            <a href="login.html" class="nav-link mt-auto">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        
+        <!-- Top Header -->
+        <header class="top-header">
+            <div>
+                <h2 style="color: var(--primary); font-weight: 800; margin: 0;">Appointments</h2>
+                <p style="color: var(--text-light); margin: 0; font-weight: 600;">Manage scheduled visits and consultations</p>
+            </div>
+            <div class="user-info d-flex align-items-center gap-3">
+                <div class="text-end d-none d-sm-block">
+                    <div class="fw-bold" style="color: var(--primary);">Dr. Farhana</div>
+                    <div class="small text-muted">Neurology</div>
+                </div>
+            </div>
+        </header>
+
+        <div class="container-fluid p-0">
+            
+            <div class="controls-container">
+                
+                <div class="input-group" style="max-width: 300px; flex-grow: 1;">
+                    <span class="input-group-text bg-white border-end"><i class="fas fa-search text-muted"></i></span>
+                    <input type="text" class="form-control" id="searchAppointment" placeholder="Search by Patient or Doctor..." oninput="renderAppointments()">
+                </div>
+
+                <!-- Status Filter -->
+                <div style="max-width: 250px; flex-grow: 1;">
+                    <select class="form-select" id="filterStatus" onchange="renderAppointments()">
+                        <option value="All">All Statuses</option>
+                        <option value="Scheduled">Scheduled</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+                </div>
+
+                <!-- Add Button -->
+                <button class="btn btn-primary" onclick="openAppointmentModal()">
+                    <i class="fas fa-plus me-1"></i> Add Appointment
+                </button>
+            </div>
+
+            <!-- APPOINTMENT LIST TABLE -->
+            <div class="table-card">
+                <div class="table-responsive">
+                    <table class="table table-custom table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Date & Time</th>
+                                <th>Patient Name</th>
+                                <th>Doctor Name</th>
+                                <th>Purpose</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="appointment-table-body">
+                        </tbody>
+                    </table>
+                </div>
+                 <div id="no-appts-msg" class="text-center text-muted py-4" style="display:none;">
+                    No appointments found.
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Add or Edit -->
+    <div class="modal fade" id="appointmentModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" style="color: var(--primary);" id="appointmentModalTitle">Add Appointment</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="appointmentForm">
+                        <input type="hidden" id="apptId">
+                        
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Patient Name</label>
+                            <select class="form-select" id="apptPatient" required>
+                                <option value="">-- Select Patient --</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Doctor Name</label>
+                            <select class="form-select" id="apptDoctor" required>
+                                <option value="">-- Select Doctor --</option>
+                            </select>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label class="form-label small fw-bold">Date</label>
+                                <input type="date" class="form-control" id="apptDate" required>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label class="form-label small fw-bold">Time</label>
+                                <input type="time" class="form-control" id="apptTime" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Purpose</label>
+                            <select class="form-select" id="apptPurpose" required>
+                                <option value="Checkup">Checkup</option>
+                                <option value="Follow-up">Follow-up</option>
+                                <option value="Emergency">Emergency</option>
+                                <option value="Consultation">Consultation</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Status</label>
+                            <select class="form-select" id="apptStatus" required>
+                                <option value="Scheduled">Scheduled</option>
+                                <option value="Completed">Completed</option>
+                                <option value="Cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="saveAppointment()">Save Appointment</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        let patients = [
+            { id: 'P01', name: 'Ahmad Fauzi bin Hassan' },
+            { id: 'P02', name: 'Nur Aisyah binti Abdullah' },
+            { id: 'P03', name: 'Mohd Firdaus bin Ismail' },
+            { id: 'P04', name: 'Siti Nurul Huda binti Mohd Ali' },
+            { id: 'P05', name: 'Muhammad Syafiq bin Razak' },
+            { id: 'P06', name: 'Noraini binti Yusof' },
+            { id: 'P07', name: 'Abdul Rahman bin Daud' },
+            { id: 'P08', name: 'Nurul Syazana binti Ahmad' }
+        ];
+
+        let doctors = [
+            { id: 'D01', name: 'Dr. Farhana', spec: 'Neurology' },
+            { id: 'D02', name: 'Dr. Ahmad Razif', spec: 'General Medicine' },
+            { id: 'D03', name: 'Dr. Nurul Hidayah', spec: 'Pediatrics' }
+        ];
+
+        let appointments = [
+            { id: 'A-88201', patientName: 'Ahmad Fauzi bin Hassan', doctorName: 'Dr. Farhana', date: '2026-01-10', time: '09:30', purpose: 'Checkup', status: 'Scheduled' },
+            { id: 'A-88202', patientName: 'Nur Aisyah binti Abdullah', doctorName: 'Dr. Ahmad Razif', date: '2026-01-22', time: '10:45', purpose: 'Follow-up', status: 'Completed' },
+            { id: 'A-88203', patientName: 'Mohd Firdaus bin Ismail', doctorName: 'Dr. Farhana', date: '2026-02-05', time: '03.45', purpose: 'Consultation', status: 'Scheduled' },
+            { id: 'A-88204', patientName: 'Siti Nurul Huda binti Mohd Ali', doctorName: 'Dr. Nurul Hidayah', date: '2026-02-14', time: '11:30', purpose: 'Emergency', status: 'Cancelled' },
+            { id: 'A-88205', patientName: 'Muhammad Syafiq bin Razak', doctorName: 'Dr. Ahmad Razif', date: '2026-02-27', time: '09:30', purpose: 'Checkup', status: 'Scheduled' },
+            { id: 'A-88206', patientName: 'Noraini binti Yusof', doctorName: 'Dr. Farhana', date: '2026-03-03', time: '16:00', purpose: 'Follow-up', status: 'Scheduled' },
+            { id: 'A-88207', patientName: 'Abdul Rahman bin Daud', doctorName: 'Dr. Nurul Hidayah', date: '2026-03-16', time: '08:45', purpose: 'Checkup', status: 'Completed' },
+            { id: 'A-88208', patientName: 'Nurul Syazana binti Ahmad', doctorName: 'Dr. Ahmad Razif', date: '2026-03-28', time: '13:00', purpose: 'Consultation', status: 'Scheduled' },
+            { id: 'A-88209', patientName: 'Ahmad Fauzi bin Hassan', doctorName: 'Dr. Nurul Hidayah', date: '2026-04-02', time: '10:00', purpose: 'Checkup', status: 'Completed' },
+            { id: 'A-88210', patientName: 'Nur Aisyah binti Abdullah', doctorName: 'Dr. Farhana', date: '2026-04-07', time: '11:30', purpose: 'Follow-up', status: 'Scheduled' },
+            { id: 'A-88211', patientName: 'Mohd Firdaus bin Ismail', doctorName: 'Dr. Ahmad Razif', date: '2026-04-12', time: '15:30', purpose: 'Emergency', status: 'Completed' },
+            { id: 'A-88212', patientName: 'Siti Nurul Huda binti Mohd Ali', doctorName: 'Dr. Farhana', date: '2026-04-18', time: '09:00', purpose: 'Consultation', status: 'Scheduled' },
+            { id: 'A-88213', patientName: 'Muhammad Syafiq bin Razak', doctorName: 'Dr. Nurul Hidayah', date: '2026-04-23', time: '12:15', purpose: 'Checkup', status: 'Cancelled' },
+            { id: 'A-88214', patientName: 'Noraini binti Yusof', doctorName: 'Dr. Ahmad Razif', date: '2026-04-30', time: '14:45', purpose: 'Follow-up', status: 'Scheduled' },
+            { id: 'A-88215', patientName: 'Abdul Rahman bin Daud', doctorName: 'Dr. Farhana', date: '2026-06-08', time: '10:00', purpose: 'Checkup', status: 'Completed' },
+            { id: 'A-88216', patientName: 'Nurul Syazana binti Ahmad', doctorName: 'Dr. Ahmad Razif', date: '2026-06-20', time: '08:30', purpose: 'Emergency', status: 'Scheduled' }
+        ];
+
+        let appointmentModalInstance;
+
+        function saveAllData() {
+            console.log("Data updated in runtime memory");
+        }
+
+        function generateId(prefix) {
+            return prefix + '-' + Math.floor(10000 + Math.random() * 90000);
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'custom-toast';
+            let icon = type === 'success' ? '<i class="fas fa-check-circle text-success"></i>' : '<i class="fas fa-exclamation-circle text-danger"></i>';
+            if(type === 'error') toast.style.borderLeftColor = '#dc3545';
+            toast.innerHTML = `${icon} <span class="small fw-bold">${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
+        }
+
+        function formatDateTime(dateStr, timeStr) {
+            const d = new Date(dateStr + 'T' + timeStr);
+            return d.toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            appointmentModalInstance = new bootstrap.Modal(document.getElementById('appointmentModal'));
+            renderAppointments();
+        });
+
+        function renderAppointments() {
+            const tbody = document.getElementById('appointment-table-body');
+            const emptyMsg = document.getElementById('no-appts-msg');
+            const searchQuery = document.getElementById('searchAppointment').value.toLowerCase();
+            const statusFilter = document.getElementById('filterStatus').value;
+
+            tbody.innerHTML = '';
+            let displayList = appointments.filter(appt => {
+                const matchesSearch = appt.patientName.toLowerCase().includes(searchQuery) || 
+                                      appt.doctorName.toLowerCase().includes(searchQuery);
+                const matchesStatus = statusFilter === 'All' || appt.status === statusFilter;
+                return matchesSearch && matchesStatus;
+            });
+
+            displayList.sort((a, b) => {
+                const dateA = new Date(a.date + 'T' + a.time);
+                const dateB = new Date(b.date + 'T' + b.time);
+                return dateA - dateB;
+            });
+
+            if (displayList.length === 0) {
+                emptyMsg.style.display = 'block';
+                emptyMsg.innerText = "No appointments found.";
+                return;
+            } else {
+                emptyMsg.style.display = 'none';
+            }
+
+            displayList.forEach(appt => {
+                const row = document.createElement('tr');
+                
+                let badgeClass = '';
+                if(appt.status === 'Scheduled') badgeClass = 'status-scheduled';
+                else if(appt.status === 'Completed') badgeClass = 'status-completed';
+                else if(appt.status === 'Cancelled') badgeClass = 'status-cancelled';
+
+                row.innerHTML = `
+                    <td class="fw-bold">${formatDateTime(appt.date, appt.time)}</td>
+                    <td>${appt.patientName}</td>
+                    <td>${appt.doctorName}</td>
+                    <td>${appt.purpose}</td>
+                    <td><span class="badge status-badge ${badgeClass}">${appt.status}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary me-1" onclick="editAppointment('${appt.id}')" title="Edit">
+                            <i class="fas fa-pen"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteAppointment('${appt.id}')" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function openAppointmentModal() {
+            document.getElementById('appointmentForm').reset();
+            document.getElementById('apptId').value = '';
+            document.getElementById('appointmentModalTitle').innerText = "Add Appointment";
+            
+            document.getElementById('apptStatus').value = "Scheduled";
+            
+            const now = new Date();
+            document.getElementById('apptDate').value = now.toISOString().split('T')[0];
+            const timeString = now.toTimeString().split(' ')[0].substring(0,5);
+            document.getElementById('apptTime').value = timeString;
+
+            populateDropdowns();
+
+            appointmentModalInstance.show();
+        }
+
+        function populateDropdowns() {
+            // Use hardcoded arrays instead of localStorage
+            const pSelect = document.getElementById('apptPatient');
+            pSelect.innerHTML = '<option value="">-- Select Patient --</option>';
+            patients.forEach(p => {
+                pSelect.innerHTML += `<option value="${p.name}">${p.name}</option>`;
+            });
+
+            const dSelect = document.getElementById('apptDoctor');
+            dSelect.innerHTML = '<option value="">-- Select Doctor --</option>';
+            // Updated to match the names exactly in your appointment data (without spec in value)
+            doctors.forEach(d => {
+                dSelect.innerHTML += `<option value="${d.name}">${d.name}</option>`;
+            });
+        }
+
+        function editAppointment(id) {
+            const appt = appointments.find(a => a.id === id);
+            if(appt) {
+                populateDropdowns(); 
+
+                document.getElementById('apptId').value = appt.id;
+                document.getElementById('apptPatient').value = appt.patientName;
+                document.getElementById('apptDoctor').value = appt.doctorName;
+                document.getElementById('apptDate').value = appt.date;
+                document.getElementById('apptTime').value = appt.time;
+                document.getElementById('apptPurpose').value = appt.purpose;
+                document.getElementById('apptStatus').value = appt.status;
+                
+                document.getElementById('appointmentModalTitle').innerText = "Edit Appointment";
+                appointmentModalInstance.show();
+            }
+        }
+
+        function saveAppointment() {
+            const id = document.getElementById('apptId').value;
+            const patientName = document.getElementById('apptPatient').value;
+            const doctorName = document.getElementById('apptDoctor').value;
+            const date = document.getElementById('apptDate').value;
+            const time = document.getElementById('apptTime').value;
+            const purpose = document.getElementById('apptPurpose').value;
+            const status = document.getElementById('apptStatus').value;
+
+            if(!patientName || !doctorName || !date || !time || !purpose || !status) {
+                showToast("Please fill all fields", "error");
+                return;
+            }
+
+            if(id) {
+                // Update 
+                const index = appointments.findIndex(a => a.id === id);
+                if(index > -1) {
+                    appointments[index] = { ...appointments[index], patientName, doctorName, date, time, purpose, status };
+                    showToast("Appointment updated successfully");
+                }
+            } else {
+                // Add New
+                const newAppt = { 
+                    id: generateId('A'), 
+                    patientName, 
+                    doctorName, 
+                    date, 
+                    time, 
+                    purpose, 
+                    status 
+                };
+                appointments.push(newAppt);
+                showToast("Appointment added successfully");
+            }
+
+            saveAllData();
+            renderAppointments();
+            appointmentModalInstance.hide();
+        }
+
+        function deleteAppointment(id) {
+            if(confirm("Are you sure you want to delete this appointment?")) {
+                appointments = appointments.filter(a => a.id !== id);
+                saveAllData();
+                renderAppointments();
+                showToast("Appointment deleted", "error");
+            }
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+        }
+    </script>

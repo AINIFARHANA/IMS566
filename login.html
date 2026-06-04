@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Login</title>
+
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+</head>
+
+<body>
+
+<main class="auth-wrapper">
+
+<header class="auth-header">
+
+    <div class="logo-container">
+        <img src="image/logo.png" alt="Logo">
+    </div>
+
+    <h1 class="clinic-name">Lunara Clinic</h1>
+    <p class="clinic-tagline">Healing with Care and Comfort</p>
+
+</header>
+
+<section class="forms-container">
+
+<form class="auth-form" id="loginForm">
+
+    <div class="input-group">
+        <input type="text" name="doctorName" placeholder="Username" required>
+        <i class="fas fa-user"></i>
+    </div>
+
+    <div class="input-group">
+        <input type="password" id="passwordInput" placeholder="Password" required>
+        <i class="fas fa-lock"></i>
+    </div>
+
+    <button class="gooey-btn" id="loginBtn" type="submit">
+
+        <span class="btn-text">Login</span>
+
+        <span class="spinner" style="display:none;">
+            <i class="fas fa-spinner fa-spin"></i>
+        </span>
+
+    </button>
+
+    <div class="switch-text">
+        Don't have account?
+        <a class="switch-link" href="register.html">Register</a>
+    </div>
+
+</form>
+
+</section>
+
+</main>
+<div id="toast-container"></div>
+
+<script src="script.js"></script>
+
+</body>
+</html>

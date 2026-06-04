@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lunara Clinic Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #01357a; 
+            --primary-light: #2e5bb8;
+            --secondary: #EBF5FB; 
+            --text-dark: #2d3436;
+            --text-light: #636e72;
+            --white: #ffffff;
+            --sidebar-width: 260px;
+            --success: #00b894;
+            --danger: #e17055;
+            --warning: #fdcb6e;
+        }
+
+        body {
+            font-family: 'Times New Roman', sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        /* --- Sidebar --- */
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: linear-gradient(180deg, #01357a 0%, #002a63 100%);
+            color: white;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar-logo {
+            width: 70px;
+            height: 70px;
+            background: var(--secondary);
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border: 3px solid rgba(255,255,255,0.2);
+        }
+        
+        .sidebar-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .clinic-name { font-weight: 800; font-size: 20px; letter-spacing: 0.5px; }
+        .clinic-tagline { font-size: 13px; opacity: 0.8; font-weight: 600; }
+
+        .nav-link {
+            color: rgba(255,255,255,0.7);
+            padding: 12px 15px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            transition: all 0.3s;
+            font-weight: 600;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: rgba(255,255,255,0.15);
+            color: #ffffff; 
+            transform: translateX(5px);
+        }
+
+        /* --- Main Content --- */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 20px 30px;
+            transition: all 0.3s;
+        }
+
+        .top-header {
+            background: var(--white);
+            padding: 15px 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .mobile-toggle {
+            display: none; 
+            background: var(--primary);
+            border: none;
+            color: white;
+            font-size: 18px;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            z-index: 1002;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .greeting-box h2 { color: var(--primary); font-weight: 800; margin: 0; font-size: 24px; }
+        .greeting-box p { color: var(--text-light); margin: 0; font-weight: 600; font-size: 14px; }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.03);
+            border-left: 5px solid transparent;
+            height: 100%;
+            transition: transform 0.2s;
+        }
+        .stat-card:hover { transform: translateY(-5px); }
+        .stat-card.patients { border-color: #4FC3F7; }
+        .stat-card.doctors { border-color: #01357a; }
+        .stat-card.appointments { border-color: #00b894; }
+        .stat-number { font-size: 28px; font-weight: 800; color: var(--text-dark); }
+
+        .profile-card, .calendar-card, .chart-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.03);
+            padding: 20px;
+            height: auto;
+            margin-bottom: 20px;
+        }
+
+        /* --- CALENDAR STYLES --- */
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .calendar-nav-btn { background: none; border: none; color: var(--primary); cursor: pointer; padding: 5px; transition: transform 0.2s; }
+        .calendar-nav-btn:hover { transform: scale(1.2); }
+        .calendar-nav-btn:disabled { color: #ccc; cursor: not-allowed; transform: none; }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            text-align: center;
+            font-size: 12px;
+            margin-bottom: 15px;
+        }
+        .cal-day-name { color: var(--primary); font-weight: 700; padding: 5px 0; }
+        .cal-day { 
+            padding: 8px 0; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            color: #555; 
+            transition: background 0.2s; 
+            position: relative;
+            height: 35px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .cal-day:hover { background-color: var(--secondary); }
+        .cal-day.active { background-color: var(--primary); color: white; }
+        .cal-day.selected { border: 2px solid var(--primary); color: var(--primary); font-weight: bold; }
+        .cal-day.disabled { color: #ccc; pointer-events: none; }
+        
+        .cal-dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            position: absolute;
+            bottom: 4px;
+        }
+        .dot-Scheduled { background-color: var(--primary); }
+        .dot-Completed { background-color: var(--success); }
+        .dot-Cancelled { background-color: var(--danger); }
+        .cal-day.active .cal-dot { background-color: white; }
+
+        /* --- LIST STYLES --- */
+        .appt-list-container { max-height: 300px; overflow-y: auto; padding-right: 5px; }
+        .appt-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border-left: 3px solid var(--primary);
+            animation: slideIn 0.4s ease-out forwards;
+            opacity: 0;
+            transform: translateX(20px);
+        }
+        .appt-item.status-Completed { border-left-color: var(--success); background-color: #e8f8f5; }
+        .appt-item.status-Cancelled { border-left-color: var(--danger); background-color: #fdeaea; opacity: 0.8; }
+
+        @keyframes slideIn { to { opacity: 1; transform: translateX(0); } }
+
+        .appt-date-badge { font-size: 10px; background: #e9ecef; padding: 2px 6px; border-radius: 4px; color: #666; margin-right: 5px; }
+        .appt-time { font-size: 12px; font-weight: 700; color: var(--primary); min-width: 60px; }
+        .appt-patient { font-size: 14px; font-weight: 600; color: var(--text-dark); }
+        .appt-actions { margin-left: auto; display: flex; gap: 8px; }
+        
+        .btn-action { cursor: pointer; opacity: 0.6; transition: opacity 0.2s; border: none; background: none; padding: 4px; }
+        .btn-action:hover { opacity: 1; transform: scale(1.1); }
+        .btn-edit { color: #0d6efd; }
+        .btn-cancel { color: #fd7e14; }
+        .btn-delete { color: #dc3545; }
+
+        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 2000; }
+        .custom-toast {
+            background: white;
+            border-left: 4px solid var(--primary);
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: toastIn 0.3s ease-out;
+            min-width: 250px;
+        }
+        @keyframes toastIn { from { opacity: 0; transform: translateX(50px); } to { opacity: 1; transform: translateX(0); } }
+
+        /* Info Row in Profile */
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dashed #eee;
+            font-size: 14px;
+        }
+        .info-label { font-weight: 700; color: #888; }
+        .info-value { font-weight: 600; color: var(--text-dark); }
+
+        @media (max-width: 991px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.active { transform: translateX(0); }
+            .main-content { margin-left: 0; }
+            .mobile-toggle { display: block; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="toast-container" id="toast-container"></div>
+
+    <div style="position: fixed; top: 15px; left: 15px; z-index: 1002;">
+        <button class="mobile-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+    </div>
+
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <img src="image/logo.png" alt="Lunara Clinic Logo">
+            </div>
+            <div class="clinic-name">Lunara Clinic</div>
+            <div class="clinic-tagline">Healing with Care & Comfort</div>
+        </div>
+
+        <div class="nav flex-column">
+            <a href="index.html" class="nav-link active">
+                <i class="fas fa-th-large"></i> Dashboard
+            </a>
+            <a href="patient.html" class="nav-link ">
+                <i class="fas fa-user-injured"></i> Patients
+            </a>
+            <a href="doctor.html" class="nav-link">
+                <i class="fas fa-user-md"></i> Doctors
+            </a>
+            <a href="appointment.html" class="nav-link">
+                <i class="fas fa-calendar-check"></i> Appointments
+            </a>
+            <a href="login.html" class="nav-link mt-auto">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <header class="top-header">
+            <div class="greeting-box">
+                <h2 id="greeting-text">Good Day, Dr.</h2>
+                <p id="current-date-display">Loading date...</p>
+            </div>
+            <div class="calendar-widget d-flex align-items-center gap-2" style="color: var(--primary); font-weight: 700;">
+                <i class="far fa-calendar-alt fa-lg"></i>
+                <span id="calendar-date">--/--/----</span>
+            </div>
+        </header>
+
+        <div class="container-fluid p-0">
+            <div class="row g-4 mb-4">
+                <div class="col-md-4">
+                    <div class="stat-card patients">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="stat-number" id="total-patients-count">0</div>
+                                <div class="stat-label text-muted small fw-bold">TOTAL PATIENTS</div>
+                            </div>
+                            <i class="fas fa-users fa-2x text-primary opacity-25"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card doctors">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="stat-number" id="total-doctors-count">0</div>
+                                <div class="stat-label text-muted small fw-bold">TOTAL DOCTORS</div>
+                            </div>
+                            <i class="fas fa-user-md fa-2x text-primary opacity-25"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card appointments">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="stat-number" id="today-appt-count">0</div>
+                                <div class="stat-label text-muted small fw-bold">TODAY APPOINTMENT</div>
+                            </div>
+                            <i class="fas fa-calendar-check fa-2x text-success opacity-25"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-lg-8">
+                    <!-- Monthly Visits Chart -->
+                    <div class="chart-card">
+                        <h5 class="fw-bold mb-3" style="color: var(--primary);">Monthly Visits (2026)</h5>
+                        <div style="height: 300px; position: relative;">
+                            <canvas id="monthlyVisitsChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Charts Row -->
+                    <div class="row g-4">
+                        <!-- Types Chart -->
+                        <div class="col-md-6">
+                            <div class="chart-card" style="margin-bottom: 0;">
+                                <h5 class="fw-bold mb-3" style="color: var(--primary);">Appointment Types</h5>
+                                <div style="height: 250px; position: relative;">
+                                    <canvas id="typesChart"></canvas>
+                                </div>
+                                <div class="text-center mt-2 small text-muted">Distribution by Type</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="chart-card" style="margin-bottom: 0;">
+                                <h5 class="fw-bold mb-3" style="color: var(--primary);">Appointments Status</h5>
+                                <div style="height: 250px; position: relative; display: flex; justify-content: center;">
+                                    <canvas id="appointmentPieChart"></canvas>
+                                </div>
+                                <div class="text-center mt-2 small text-muted">Live Status Distribution</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="profile-card">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="fw-bold m-0" style="color: var(--primary);">My Profile</h6>
+                            <button class="btn btn-sm btn-outline-primary rounded-pill" onclick="toggleEditProfile()"><i class="fas fa-pen"></i> Edit</button>
+                        </div>
+                        <div id="viewProfile">
+                            <div class="text-center mb-3">
+                                <h6 class="fw-bold mb-0" id="disp-name">Dr. Farhana</h6>
+                                <span class="text-muted fw-bold small" id="disp-scope">Neurology</span>
+                            </div>
+                            <div class="info-row"><span class="info-label">Date of Birth: </span><span class="info-value" id="disp-dob">01 Dec 2004</span></div>
+                            <div class="info-row"><span class="info-label">Blood: </span><span class="info-value" id="disp-blood">A</span></div>
+                            <div class="info-row"><span class="info-label">Working Hours: </span><span class="info-value" id="disp-hours">08:00 AM - 04:00 PM</span></div>
+                        </div>
+                        <div id="editProfileForm" style="display: none;">
+                            <form class="edit-form" onsubmit="saveProfile(event)">
+                                <input type="text" id="input-name" class="form-control mb-2" value="Dr. Farhana">
+                                <input type="text" id="input-scope" class="form-control mb-2" value="Neurology">
+                                <input type="date" id="input-dob" class="form-control mb-2" value="2004-12-01">
+                                <select id="input-blood" class="form-control mb-2">
+                                    <option value="A">A</option>
+                                    <option value="B">B</option>
+                                    <option value="AB">AB</option>
+                                    <option value="O">O</option>
+                                </select>
+                                <button type="submit" class="btn btn-primary w-100 btn-sm">Save</button>
+                                <button type="button" class="btn btn-outline-danger w-100 btn-sm mt-2" onclick="toggleEditProfile()">Cancel</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="calendar-card" style="margin-bottom: 0;">
+                        <div class="calendar-header">
+                            <button class="calendar-nav-btn" id="prevMonth" onclick="changeMonth(-1)"><i class="fas fa-chevron-left"></i></button>
+                            <h6 class="fw-bold m-0" style="color: var(--primary);" id="cal-month-year">Month Year</h6>
+                            <button class="calendar-nav-btn" id="nextMonth" onclick="changeMonth(1)"><i class="fas fa-chevron-right"></i></button>
+                        </div>
+                        <div class="calendar-grid mb-3" id="dynamic-calendar"></div>
+                        
+                        <h6 class="fw-bold small text-muted mb-2 d-flex justify-content-between">
+                            <span id="list-title">Upcoming</span>
+                            <span id="reset-filter" style="cursor:pointer; color:var(--primary); display:none;" onclick="resetCalendarFilter()">Show All</span>
+                        </h6>
+                        <div class="appt-list-container" id="appt-list"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="appointmentModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header" style="background-color: var(--secondary);">
+                    <h5 class="modal-title fw-bold" style="color: var(--primary);" id="appointmentModalTitle">New Appointment</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="apptForm">
+                        <input type="hidden" id="apptId">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Patient Name</label>
+                            <input type="text" class="form-control" id="apptPatientName" placeholder="e.g. John Doe" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Doctor Name</label>
+                            <input type="text" class="form-control" id="apptDoctorName" placeholder="e.g. Dr. Farhana" value="Dr. Farhana" required>
+                        </div>
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label class="form-label small fw-bold">Date</label>
+                                <input type="date" class="form-control" id="apptDate" required>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label class="form-label small fw-bold">Time</label>
+                                <input type="time" class="form-control" id="apptTime" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label class="form-label small fw-bold">Purpose (Type)</label>
+                                <select class="form-select" id="apptPurpose">
+                                    <option value="Checkup">Checkup</option>
+                                    <option value="Consultation">Consultation</option>
+                                    <option value="Follow-up">Follow-up</option>
+                                    <option value="Emergency">Emergency</option>
+                                </select>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label class="form-label small fw-bold">Status</label>
+                                <select class="form-select" id="apptStatus">
+                                    <option value="Scheduled">Scheduled</option>
+                                    <option value="Completed">Completed</option>
+                                    <option value="Cancelled">Cancelled</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="handleSaveAppointment()">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        const MockBackend = {
+            data: {
+                doctors: [
+                    { id: 1, name: "Dr. Farhana", specialty: "Neurology" },
+                    { id: 2, name: "Dr. Ahmad Razif", specialty: "Cardiology" },
+                    { id: 3, name: "Dr. Nurul Hidayah", specialty: "Pediatrics" }
+                ],
+                patients: [
+                    { id: 'P-101', name: "Ahmad Fauzi bin Hassan", dob: "1985-05-12" },
+                    { id: 'P-102', name: "Nur Aisyah binti Abdullah", dob: "1990-08-22" },
+                    { id: 'P-103', name: "Mohd Firdaus bin Ismail", dob: "1992-11-03" },
+                    { id: 'P-104', name: "Siti Nurul Huda binti Mohd Ali", dob: "1988-02-14" },
+                    { id: 'P-105', name: "Muhammad Syafiq bin Razak", dob: "1995-07-30" },
+                    { id: 'P-106', name: "Noraini binti Yusof", dob: "1989-09-12" },
+                    { id: 'P-107', name: "Abdul Rahman bin Daud", dob: "1975-03-25" },
+                    { id: 'P-108', name: "Nurul Syazana binti Ahmad", dob: "1998-12-10" }
+                ],
+                appointments: [
+                    { id: 'A-88201', patientName: 'Ahmad Fauzi bin Hassan', doctorName: 'Dr. Farhana', date: '2026-01-10', time: '09:30', purpose: 'Checkup', status: 'Scheduled' },
+                    { id: 'A-88202', patientName: 'Nur Aisyah binti Abdullah', doctorName: 'Dr. Ahmad Razif', date: '2026-01-22', time: '10:45', purpose: 'Follow-up', status: 'Completed' },
+                    { id: 'A-88203', patientName: 'Mohd Firdaus bin Ismail', doctorName: 'Dr. Farhana', date: '2026-02-05', time: '03:45', purpose: 'Consultation', status: 'Scheduled' },
+                    { id: 'A-88204', patientName: 'Siti Nurul Huda binti Mohd Ali', doctorName: 'Dr. Nurul Hidayah', date: '2026-02-14', time: '11:30', purpose: 'Emergency', status: 'Cancelled' },
+                    { id: 'A-88205', patientName: 'Muhammad Syafiq bin Razak', doctorName: 'Dr. Ahmad Razif', date: '2026-02-27', time: '09:30', purpose: 'Checkup', status: 'Scheduled' },
+                    { id: 'A-88206', patientName: 'Noraini binti Yusof', doctorName: 'Dr. Farhana', date: '2026-03-03', time: '16:00', purpose: 'Follow-up', status: 'Scheduled' },
+                    { id: 'A-88207', patientName: 'Abdul Rahman bin Daud', doctorName: 'Dr. Nurul Hidayah', date: '2026-03-16', time: '08:45', purpose: 'Checkup', status: 'Completed' },
+                    { id: 'A-88208', patientName: 'Nurul Syazana binti Ahmad', doctorName: 'Dr. Ahmad Razif', date: '2026-03-28', time: '13:00', purpose: 'Consultation', status: 'Scheduled' },
+                    { id: 'A-88209', patientName: 'Ahmad Fauzi bin Hassan', doctorName: 'Dr. Nurul Hidayah', date: '2026-04-02', time: '10:00', purpose: 'Checkup', status: 'Completed' },
+                    { id: 'A-88210', patientName: 'Nur Aisyah binti Abdullah', doctorName: 'Dr. Farhana', date: '2026-04-07', time: '11:30', purpose: 'Follow-up', status: 'Scheduled' },
+                    { id: 'A-88211', patientName: 'Mohd Firdaus bin Ismail', doctorName: 'Dr. Ahmad Razif', date: '2026-04-12', time: '15:30', purpose: 'Emergency', status: 'Completed' },
+                    { id: 'A-88212', patientName: 'Siti Nurul Huda binti Mohd Ali', doctorName: 'Dr. Farhana', date: '2026-04-18', time: '09:00', purpose: 'Consultation', status: 'Scheduled' },
+                    { id: 'A-88213', patientName: 'Muhammad Syafiq bin Razak', doctorName: 'Dr. Nurul Hidayah', date: '2026-04-23', time: '12:15', purpose: 'Checkup', status: 'Cancelled' },
+                    { id: 'A-88214', patientName: 'Noraini binti Yusof', doctorName: 'Dr. Ahmad Razif', date: '2026-04-30', time: '14:45', purpose: 'Follow-up', status: 'Scheduled' },
+                    { id: 'A-88215', patientName: 'Abdul Rahman bin Daud', doctorName: 'Dr. Farhana', date: '2026-06-08', time: '10:00', purpose: 'Checkup', status: 'Completed' },
+                    { id: 'A-88216', patientName: 'Nurul Syazana binti Ahmad', doctorName: 'Dr. Ahmad Razif', date: '2026-06-20', time: '08:30', purpose: 'Emergency', status: 'Scheduled' }
+                ]
+            },
+
+            get: async (endpoint) => {
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        if (endpoint === '/api/doctors') resolve([...MockBackend.data.doctors]);
+                        else if (endpoint === '/api/patients') resolve([...MockBackend.data.patients]);
+                        else if (endpoint === '/api/appointments') resolve([...MockBackend.data.appointments]);
+                    }, 300);
+                });
+            },
+
+            post: async (endpoint, payload) => {
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        if (endpoint === '/api/appointments') {
+                            if (payload.id) {
+                                const index = MockBackend.data.appointments.findIndex(a => a.id == payload.id);
+                                if (index !== -1) MockBackend.data.appointments[index] = payload;
+                            } else {
+                                payload.id = payload.id ? payload.id : Date.now();
+                                MockBackend.data.appointments.push(payload);
+                                const exists = MockBackend.data.patients.find(p => p.name.toLowerCase() === payload.patientName.toLowerCase());
+                                if (!exists) {
+                                    MockBackend.data.patients.push({
+                                        id: 'P-' + Math.floor(Math.random()*10000),
+                                        name: payload.patientName,
+                                        dob: "Unknown"
+                                    });
+                                }
+                            }
+                            resolve(payload);
+                        }
+                    }, 300);
+                });
+            },
+
+            delete: async (endpoint, id) => {
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        if (endpoint === '/api/appointments') {
+                            MockBackend.data.appointments = MockBackend.data.appointments.filter(a => a.id != id);
+                            resolve({ success: true });
+                        }
+                    }, 300);
+                });
+            }
+        };
+
+        const ApiClient = {
+            getAppointments: () => MockBackend.get('/api/appointments'),
+            getDoctors: () => MockBackend.get('/api/doctors'),
+            getPatients: () => MockBackend.get('/api/patients'),
+            saveAppointment: (data) => MockBackend.post('/api/appointments', data),
+            deleteAppointment: (id) => MockBackend.delete('/api/appointments', id)
+        };
+        let calendarViewDate = new Date();
+        const minCalendarDate = new Date('2023-01-01');
+        let appointments = [];
+        let doctors = [];
+        let patients = [];
+        let currentFilterDate = null; 
+        
+        let barChartInstance = null;
+        let pieChartInstance = null;
+        let typesChartInstance = null;
+        let modalInstance = null;
+
+        function generateId(prefix) { return prefix + '-' + Date.now().toString().slice(-6); }
+        
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'custom-toast';
+            let icon = type === 'success' ? '<i class="fas fa-check-circle text-success"></i>' : '<i class="fas fa-exclamation-circle text-danger"></i>';
+            if(type === 'error') toast.style.borderLeftColor = '#dc3545';
+            toast.innerHTML = `${icon} <span class="small fw-bold">${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
+        }
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            const now = new Date();
+            const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            document.getElementById('current-date-display').textContent = `${months[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()}`;
+            document.getElementById('calendar-date').textContent = `${now.getDate()}/${now.getMonth() + 1}/${now.getFullYear()}`;
+            
+            modalInstance = new bootstrap.Modal(document.getElementById('appointmentModal'));
+            document.getElementById('appointmentModal').addEventListener('hidden.bs.modal', function () {
+                document.getElementById('apptForm').reset();
+                document.getElementById('apptId').value = '';
+                document.getElementById('apptDate').value = new Date().toISOString().split('T')[0];
+                document.getElementById('apptStatus').value = "Scheduled";
+                document.getElementById('apptDoctorName').value = "Dr. Farhana";
+            });
+
+            await refreshData();
+        });
+
+        async function refreshData() {
+            try {
+                const [apptData, docData, patData] = await Promise.all([
+                    ApiClient.getAppointments(),
+                    ApiClient.getDoctors(),
+                    ApiClient.getPatients()
+                ]);
+
+                appointments = apptData;
+                doctors = docData;
+                patients = patData;
+
+                updateStatsUI();
+                generateCalendar();
+                renderAppointments();
+                updateCharts();
+            } catch (error) {
+                console.error("Failed to load data", error);
+                showToast("Error loading data from server", "error");
+            }
+        }
+
+        function updateStatsUI() { 
+            document.getElementById('total-patients-count').innerText = 16;
+            document.getElementById('total-doctors-count').innerText = doctors.length;
+            
+            const todayStr = new Date().toISOString().split('T')[0];
+            const activeCount = appointments.filter(a => a.date === todayStr && a.status !== 'Cancelled').length;
+            document.getElementById('today-appt-count').innerText = activeCount;
+        }
+
+        function generateCalendar() {
+            const grid = document.getElementById('dynamic-calendar');
+            grid.innerHTML = ''; 
+            const year = calendarViewDate.getFullYear();
+            const month = calendarViewDate.getMonth();
+            const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+            document.getElementById('cal-month-year').innerText = `${months[month]} ${year}`;
+            
+            const prevBtn = document.getElementById('prevMonth');
+            const isMin = (year === 2023 && month === 0);
+            prevBtn.disabled = isMin;
+            prevBtn.style.opacity = isMin ? '0.3' : '1';
+
+            const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+            days.forEach(day => {
+                const el = document.createElement('div');
+                el.className = 'cal-day-name';
+                el.innerText = day;
+                grid.appendChild(el);
+            });
+
+            const firstDay = new Date(year, month, 1).getDay(); 
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            for(let i = 0; i < firstDay; i++) {
+                const el = document.createElement('div');
+                el.className = 'cal-day disabled';
+                grid.appendChild(el);
+            }
+
+            const today = new Date();
+            for(let i = 1; i <= daysInMonth; i++) {
+                const el = document.createElement('div');
+                el.className = 'cal-day';
+                el.innerText = i;
+                
+                if(i === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
+                    el.classList.add('active');
+                }
+
+                const cellDateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+                
+                const daysAppts = appointments.filter(appt => appt.date === cellDateStr);
+                
+                if(daysAppts.length > 0) {
+                    let dotClass = 'dot-Scheduled';
+                    if(daysAppts.some(a => a.status === 'Cancelled')) dotClass = 'dot-Cancelled';
+                    else if(daysAppts.some(a => a.status === 'Completed')) dotClass = 'dot-Completed';
+                    
+                    const dot = document.createElement('div');
+                    dot.className = `cal-dot ${dotClass}`;
+                    el.appendChild(dot);
+
+                    if(daysAppts.length === 1) {
+                        el.title = `${daysAppts[0].patientName} (${daysAppts[0].time})`;
+                    } else {
+                        el.title = `${daysAppts.length} Appointments`;
+                    }
+                }
+                
+                el.onclick = function() { toggleDateFilter(cellDateStr, this); };
+                grid.appendChild(el);
+            }
+        }
+
+        function changeMonth(offset) {
+            calendarViewDate.setMonth(calendarViewDate.getMonth() + offset);
+            if (calendarViewDate < minCalendarDate) calendarViewDate = new Date(minCalendarDate);
+            generateCalendar();
+        }
+
+        function toggleDateFilter(dateStr, element) {
+            const allDays = document.querySelectorAll('.cal-day:not(.disabled)');
+            
+            if(currentFilterDate === dateStr) {
+                currentFilterDate = null;
+                element.classList.remove('selected');
+                document.getElementById('reset-filter').style.display = 'none';
+                document.getElementById('list-title').innerText = "Upcoming";
+            } else {
+                document.querySelectorAll('.cal-day').forEach(d => d.classList.remove('selected'));
+                currentFilterDate = dateStr;
+                element.classList.add('selected');
+                document.getElementById('reset-filter').style.display = 'block';
+                const d = new Date(dateStr);
+                const friendlyDate = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                document.getElementById('list-title').innerText = `Appointments for ${friendlyDate}`;
+            }
+            renderAppointments();
+        }
+
+        function resetCalendarFilter() {
+            currentFilterDate = null;
+            document.querySelectorAll('.cal-day').forEach(d => d.classList.remove('selected'));
+            document.getElementById('reset-filter').style.display = 'none';
+            document.getElementById('list-title').innerText = "Upcoming";
+            renderAppointments();
+        }
+
+        function openAddModal() {
+            document.getElementById('apptForm').reset();
+            document.getElementById('apptId').value = '';
+            document.getElementById('appointmentModalTitle').innerText = "New Appointment";
+            document.getElementById('apptDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('apptStatus').value = "Scheduled";
+            document.getElementById('apptDoctorName').value = "Dr. Farhana"; 
+            modalInstance.show();
+        }
+
+        function openEditModal(id) {
+            const appt = appointments.find(a => a.id == id); 
+            if(!appt) return;
+            document.getElementById('apptId').value = appt.id;
+            document.getElementById('apptPatientName').value = appt.patientName || appt.name; 
+            document.getElementById('apptDoctorName').value = appt.doctorName || "Dr. Farhana";
+            document.getElementById('apptDate').value = appt.date;
+            document.getElementById('apptTime').value = appt.time;
+            document.getElementById('apptPurpose').value = appt.purpose || appt.type; 
+            document.getElementById('apptStatus').value = appt.status || 'Scheduled';
+            document.getElementById('appointmentModalTitle').innerText = "Edit Appointment";
+            modalInstance.show();
+        }
+
+        async function handleSaveAppointment() {
+            const idInput = document.getElementById('apptId').value;
+            const patientName = document.getElementById('apptPatientName').value;
+            const doctorName = document.getElementById('apptDoctorName').value;
+            const dateInput = document.getElementById('apptDate').value;
+            const timeInput = document.getElementById('apptTime').value;
+            const purposeInput = document.getElementById('apptPurpose').value;
+            const statusInput = document.getElementById('apptStatus').value;
+
+            if(patientName === '' || timeInput === '' || dateInput === '') {
+                showToast("Please fill all fields", "error");
+                return;
+            }
+
+            const payload = { 
+                id: idInput ? idInput : Date.now(), 
+                patientName: patientName, 
+                doctorName: doctorName,
+                date: dateInput, 
+                time: timeInput, 
+                purpose: purposeInput, 
+                status: statusInput 
+            };
+
+            try {
+                await ApiClient.saveAppointment(payload);
+                await refreshData();
+                modalInstance.hide();
+                showToast(idInput ? "Appointment updated!" : "Appointment created!");
+            } catch (e) {
+                showToast("Error saving appointment", "error");
+            }
+        }
+
+        async function toggleCancelStatus(id) {
+            const appt = appointments.find(a => a.id === id);
+            if(appt) {
+                if(appt.status === 'Scheduled') appt.status = 'Completed';
+                else if(appt.status === 'Completed') appt.status = 'Cancelled';
+                else appt.status = 'Scheduled';
+                
+                try {
+                    await ApiClient.saveAppointment(appt);
+                    await refreshData();
+                    showToast(`Status updated to ${appt.status}`);
+                } catch(e) {
+                    showToast("Error updating status", "error");
+                }
+            }
+        }
+
+        async function deleteAppt(id) {
+            if(confirm("Are you sure you want to permanently delete this appointment?")) {
+                try {
+                    await ApiClient.deleteAppointment(id);
+                    await refreshData();
+                    showToast("Appointment deleted.", "success");
+                } catch(e) {
+                    showToast("Error deleting appointment", "error");
+                }
+            }
+        }
+
+        function renderAppointments() {
+            const listContainer = document.getElementById('appt-list');
+            listContainer.innerHTML = '';
+            
+            let displayList = appointments;
+            if(currentFilterDate) {
+                displayList = appointments.filter(a => a.date === currentFilterDate);
+            } else {
+                const todayStr = new Date().toISOString().split('T')[0];
+                displayList = appointments.filter(a => a.date >= todayStr);
+            }
+
+            displayList.sort((a, b) => {
+                if(a.date !== b.date) return a.date.localeCompare(b.date);
+                return a.time.localeCompare(b.time);
+            });
+
+            if(displayList.length === 0) {
+                listContainer.innerHTML = '<div class="text-center text-muted small py-3">No appointments found.</div>';
+                return;
+            }
+
+            displayList.forEach(appt => {
+                const item = document.createElement('div');
+                item.className = `appt-item status-${appt.status}`;
+                const pName = appt.patientName || appt.name || "Unknown";
+                const pPurpose = appt.purpose || appt.type || "General";
+
+                let actionBtn = '';
+                if(appt.status === 'Scheduled') actionBtn = `<button class="btn-action btn-cancel" title="Mark Completed" onclick="toggleCancelStatus(${appt.id})"><i class="fas fa-check"></i></button>`;
+                else if (appt.status === 'Completed') actionBtn = `<button class="btn-action btn-cancel" title="Cancel Appointment" onclick="toggleCancelStatus(${appt.id})"><i class="fas fa-ban"></i></button>`;
+                else actionBtn = `<button class="btn-action btn-cancel" title="Restore/Schedule" onclick="toggleCancelStatus(${appt.id})"><i class="fas fa-undo"></i></button>`;
+                
+                item.innerHTML = `
+                    <div>
+                        <div class="appt-date-badge">${appt.date}</div>
+                        <div class="appt-time">${formatTime(appt.time)}</div>
+                    </div>
+                    <div>
+                        <div class="appt-patient">${pName}</div>
+                        <div class="text-muted small" style="font-size: 11px;">${pPurpose} - <span style="font-weight:bold; color:${appt.status === 'Cancelled' ? 'red' : 'green'}">${appt.status}</span></div>
+                    </div>
+                `;
+                listContainer.appendChild(item);
+            });
+        }
+
+        function formatTime(timeStr) {
+            const [hour, minute] = timeStr.split(':');
+            const h = parseInt(hour);
+            const ampm = h >= 12 ? 'PM' : 'AM';
+            const h12 = h % 12 || 12;
+            return `${h12}:${minute} ${ampm}`;
+        }
+
+        function updateCharts() {
+            const ctxBar = document.getElementById('monthlyVisitsChart').getContext('2d');
+            const ctxPie = document.getElementById('appointmentPieChart').getContext('2d');
+            const ctxTypes = document.getElementById('typesChart').getContext('2d');
+            
+            const targetYear = 2026; 
+            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const monthlyData = new Array(12).fill(0);
+
+            appointments.forEach(appt => {
+                const d = new Date(appt.date);
+                if(d.getFullYear() === targetYear) {
+                    monthlyData[d.getMonth()]++;
+                }
+            });
+            const filteredLabels = [];
+            const filteredData = [];
+
+            for(let i = 0; i < 12; i++) {
+                if(monthlyData[i] > 0) {
+                    filteredLabels.push(monthNames[i]);
+                    filteredData.push(monthlyData[i]);
+                }
+            }
+
+            if(barChartInstance) {
+                barChartInstance.data.labels = filteredLabels; 
+                barChartInstance.data.datasets[0].data = filteredData;
+                barChartInstance.update();
+            } else {
+                barChartInstance = new Chart(ctxBar, {
+                    type: 'bar',
+                    data: {
+                        labels: filteredLabels, 
+                        datasets: [{ label: 'Visits', data: filteredData, backgroundColor: '#3B82F6', borderRadius: 5, barThickness: 15 }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { borderDash: [2, 4] } }, x: { grid: { display: false } } }, plugins: { legend: { display: false }, title: { display: true, text: `Visits in ${targetYear}` } } }
+                });
+            }
+
+            const statusLabels = ['Scheduled', 'Completed', 'Cancelled'];
+            const statusData = statusLabels.map(label => appointments.filter(a => a.status === label).length);
+            
+            if(pieChartInstance) {
+                pieChartInstance.data.datasets[0].data = statusData;
+                pieChartInstance.update();
+            } else {
+                pieChartInstance = new Chart(ctxPie, {
+                    type: 'doughnut',
+                    data: {
+                        labels: statusLabels,
+                        datasets: [{ data: statusData, backgroundColor: ['#ff1493', '#8a2be2', '#ff0000'], borderWidth: 0, hoverOffset: 4 }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8 } } } }
+                });
+            }
+
+            const typeLabels = ['Checkup', 'Consultation', 'Follow-up', 'Emergency'];
+            const typeData = typeLabels.map(label => {
+                return appointments.filter(appt => {
+                    const val = appt.purpose || appt.type;
+                    return val === label;
+                }).length;
+            });
+            
+            const typeColors = ['#01357a', '#2563eb', '#3b82f6', '#93c5fd'];
+
+            if(typesChartInstance) {
+                typesChartInstance.data.labels = typeLabels;
+                typesChartInstance.data.datasets[0].data = typeData;
+                typesChartInstance.data.datasets[0].backgroundColor = typeColors;
+                typesChartInstance.update();
+            } else {
+                typesChartInstance = new Chart(ctxTypes, {
+                    type: 'bar',
+                    data: {
+                        labels: typeLabels,
+                        datasets: [{ 
+                            label: 'Count',
+                            data: typeData, 
+                            backgroundColor: typeColors,
+                            borderRadius: 4,
+                            barThickness: 20
+                        }]
+                    },
+                    options: { 
+                        responsive: true, 
+                        maintainAspectRatio: false,
+                        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } }, x: { grid: { display: false } } },
+                        plugins: { legend: { display: false } } 
+                    }
+                });
+            }
+        }
+
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('active'); }
+        function toggleEditProfile() {
+            const viewMode = document.getElementById('viewProfile');
+            const editMode = document.getElementById('editProfileForm');
+            if (viewMode.style.display === 'none') { viewMode.style.display = 'block'; editMode.style.display = 'none'; } 
+            else { viewMode.style.display = 'none'; editMode.style.display = 'block'; }
+        }
+        function saveProfile(event) {
+            event.preventDefault();
+            const name = document.getElementById('input-name').value;
+            const scope = document.getElementById('input-scope').value;
+            const dob = document.getElementById('input-dob').value;
+            const blood = document.getElementById('input-blood').value;
+            const dateObj = new Date(dob);
+            const readableDate = dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+            document.getElementById('disp-name').textContent = name;
+            document.getElementById('disp-scope').textContent = scope;
+            document.getElementById('disp-dob').textContent = readableDate;
+            document.getElementById('disp-blood').textContent = blood;
+            showToast("Profile updated!");
+            toggleEditProfile();
+        }
+    </script>
+</body>
+</html>
